@@ -15,6 +15,7 @@ interface Task {
 function Tasks() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [error, setError] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -57,18 +58,37 @@ function Tasks() {
     }
   };
 
+  const categories = ["All", ...new Set(tasks.map((task) => task.category))];
+  const filteredTasks =
+    selectedCategory === "All"
+      ? tasks
+      : tasks.filter((task) => task.category === selectedCategory);
+
   return (
     <div className="container mt-5">
       <h1 className="text-primary">Your Tasks</h1>
       {error && <div className="alert alert-danger">{error}</div>}
-      <button
-        className="btn btn-primary mb-3"
-        onClick={() => navigate("/createTask")}
-      >
-        Create Task
-      </button>
+      <div className="d-flex justify-content-between mb-3">
+        <button
+          className="btn btn-primary"
+          onClick={() => navigate("/createTask")}
+        >
+          Create Task
+        </button>
+        <select
+          className="form-select w-auto"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+        >
+          {categories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </div>
       <div className="row">
-        {tasks.map((task) => (
+        {filteredTasks.map((task) => (
           <div key={task.id} className="col-md-4 mb-4">
             <div className="card shadow-sm">
               <div className="card-body">
@@ -86,9 +106,8 @@ function Tasks() {
                   </small>
                 </p>
                 <span
-                  className={`badge bg-${
-                    task.status === "pending" ? "warning" : "success"
-                  }`}
+                  className={`badge bg-$
+                    {task.status === "pending" ? "warning" : "success"}`}
                 >
                   {task.status}
                 </span>
@@ -112,7 +131,9 @@ function Tasks() {
           </div>
         ))}
       </div>
-      {tasks.length === 0 && <h3>Create your first task!</h3>}
+      {filteredTasks.length === 0 && (
+        <h3>No tasks available in this category.</h3>
+      )}
     </div>
   );
 }
